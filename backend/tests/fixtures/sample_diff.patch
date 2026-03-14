@@ -1,0 +1,32 @@
+diff --git a/auth.py b/auth.py
+new file mode 100644
+index 0000000..abc1234
+--- /dev/null
++++ b/auth.py
+@@ -0,0 +1,25 @@
++import sqlite3
++import hashlib
++import os
++
++# VULNERABILITY: Hardcoded secret
++SECRET_KEY = "super_secret_key_12345"
++
++def login(username, password):
++    # VULNERABILITY: SQL injection via f-string
++    conn = sqlite3.connect("users.db")
++    cursor = conn.execute(f"SELECT * FROM users WHERE username = '{username}'")
++    user = cursor.fetchone()
++
++    if user is None:
++        return False
++
++    # VULNERABILITY: MD5 for password hashing (broken crypto)
++    stored_hash = user[2]
++    if hashlib.md5(password.encode()).hexdigest() == stored_hash:
++        return True
++    return False
++
++def get_file(path):
++    # VULNERABILITY: Path traversal
++    base = "/var/app/files/"
++    return open(base + path).read()

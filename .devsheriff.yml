@@ -1,0 +1,21 @@
+version: 1
+
+review:
+  enabled: true
+  languages: [python, typescript, go]
+  max_files_per_pr: 20
+  ignore_paths:
+    - "**/*.test.ts"
+    - "**/*.test.py"
+    - "migrations/**"
+    - "**/node_modules/**"
+    - "terraform/**"
+
+security:
+  enabled: true
+  block_merge_on: [critical]
+  scan_dependencies: true
+
+notifications:
+  post_summary_comment: true
+  summary_position: top

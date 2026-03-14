@@ -1,0 +1,35 @@
+{
+  "action": "opened",
+  "number": 42,
+  "pull_request": {
+    "number": 42,
+    "title": "Add authentication module",
+    "state": "open",
+    "html_url": "https://github.com/example/repo/pull/42",
+    "head": {
+      "sha": "abc123def456",
+      "ref": "feature/auth"
+    },
+    "user": {
+      "login": "developer",
+      "id": 12345
+    },
+    "additions": 150,
+    "deletions": 20,
+    "changed_files": 3
+  },
+  "repository": {
+    "id": 987654,
+    "name": "repo",
+    "full_name": "example/repo",
+    "private": false,
+    "default_branch": "main"
+  },
+  "installation": {
+    "id": 11111
+  },
+  "sender": {
+    "login": "developer",
+    "id": 12345
+  }
+}

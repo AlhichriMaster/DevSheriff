@@ -42,6 +42,7 @@ async def webhook(request: Request):
     event_type = request.headers.get("X-GitHub-Event", "")
     payload = await request.json()
 
+    print(f"[WEBHOOK] event_type={event_type!r} action={payload.get('action')!r}", flush=True)
     logger.info(
         "Webhook received",
         extra={"event_type": event_type, "action": payload.get("action")},
@@ -49,9 +50,33 @@ async def webhook(request: Request):
 
     if event_type == "pull_request":
         action = payload.get("action")
+        logger.info(f"PR action: {action}")
         if action in ("opened", "synchronize", "reopened"):
             from app.services.github_service import handle_pull_request_event
-            asyncio.create_task(handle_pull_request_event(payload))
+
+            async def _run_review(p=payload):
+                try:
+                    await handle_pull_request_event(p)
+                except Exception as exc:
+                    import traceback
+                    print(f"[REVIEW ERROR] {exc}\n{traceback.format_exc()}", flush=True)
+
+            asyncio.create_task(_run_review())
+
+    elif event_type == "check_suite":
+        # Fallback: check_suite fires on every push; find and review the associated PR
+        action = payload.get("action")
+        if action == "requested":
+            from app.services.github_service import handle_check_suite_event
+
+            async def _run_check_review(p=payload):
+                try:
+                    await handle_check_suite_event(p)
+                except Exception as exc:
+                    import traceback
+                    print(f"[CHECK_SUITE ERROR] {exc}\n{traceback.format_exc()}", flush=True)
+
+            asyncio.create_task(_run_check_review())
 
     return {"status": "accepted"}
 

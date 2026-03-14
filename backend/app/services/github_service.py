@@ -103,6 +103,48 @@ async def handle_pull_request_event(payload: dict):
         raise
 
 
+async def handle_check_suite_event(payload: dict):
+    """Fallback: check_suite fires on every push. Find the open PR for the head SHA and review it."""
+    installation_id = payload["installation"]["id"]
+    repo_full_name = payload["repository"]["full_name"]
+    head_sha = payload["check_suite"]["head_sha"]
+
+    print(f"[CHECK_SUITE] repo={repo_full_name} sha={head_sha}", flush=True)
+
+    token = await get_installation_token(installation_id)
+    g = Github(token)
+    repo = g.get_repo(repo_full_name)
+
+    # Find the open PR whose head matches this commit
+    pulls = repo.get_pulls(state="open", sort="updated")
+    matching_pull = None
+    for pull in pulls:
+        if pull.head.sha == head_sha:
+            matching_pull = pull
+            break
+
+    if not matching_pull:
+        print(f"[CHECK_SUITE] No open PR found for sha={head_sha}", flush=True)
+        return
+
+    print(f"[CHECK_SUITE] Found PR #{matching_pull.number}, starting review", flush=True)
+
+    # Build a synthetic payload that handle_pull_request_event can use
+    synthetic_payload = {
+        "installation": {"id": installation_id},
+        "repository": payload["repository"],
+        "pull_request": {
+            "number": matching_pull.number,
+            "title": matching_pull.title,
+            "html_url": matching_pull.html_url,
+            "head": {"sha": head_sha, "ref": matching_pull.head.ref},
+            "user": {"login": matching_pull.user.login},
+        },
+        "sender": {"login": matching_pull.user.login},
+    }
+    await handle_pull_request_event(synthetic_payload)
+
+
 def _format_comment(finding: dict) -> str:
     severity = finding.get("severity", "info")
     emoji = SEVERITY_EMOJI.get(severity, "⚪")

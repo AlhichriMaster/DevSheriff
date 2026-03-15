@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 import asyncio
 
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import load_secrets, settings
@@ -86,6 +87,11 @@ async def webhook(request: Request):
             asyncio.create_task(_run_check_review())
 
     return {"status": "accepted"}
+
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/health")
 
 
 @app.get("/health")

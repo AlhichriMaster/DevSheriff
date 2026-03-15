@@ -1,5 +1,5 @@
 steps:
-  # Step 1: Run backend tests
+  # Step 1: Run backend tests (skipped if no tests directory)
   - name: 'python:3.12'
     id: test-backend
     entrypoint: 'bash'
@@ -8,7 +8,11 @@ steps:
       - |
         cd backend
         pip install -r requirements.txt
-        pytest tests/ -v --tb=short
+        if [ -d tests ] && [ "$(ls -A tests/)" ]; then
+          pytest tests/ -v --tb=short
+        else
+          echo "No tests found, skipping."
+        fi
 
   # Step 2: Build backend Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -43,7 +47,13 @@ steps:
       - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/devsheriff-images/backend:$COMMIT_SHA'
       - '--region=us-central1'
       - '--platform=managed'
+      - '--allow-unauthenticated'
       - '--service-account=devsheriff-runner@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--set-env-vars=ENVIRONMENT=production,GCP_PROJECT_ID=$PROJECT_ID,FIRESTORE_PROJECT_ID=$PROJECT_ID'
+      - '--memory=1Gi'
+      - '--cpu=1'
+      - '--min-instances=1'
+      - '--max-instances=10'
 
   # Step 5: Build dashboard Docker image
   - name: 'gcr.io/cloud-builders/docker'

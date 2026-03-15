@@ -21,12 +21,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="DevSheriff", version="1.0.0", lifespan=lifespan)
 
+_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://devsheriff.run.app",
+    "https://devsheriff-dashboard-alziqa7q3a-uc.a.run.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 

@@ -162,7 +162,7 @@ Review the above diff and return your findings as a JSON array."""
 
     try:
         message = await client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             max_tokens=2048,
             system=system_prompt,
             messages=[{"role": "user", "content": prompt}],
@@ -189,10 +189,8 @@ Review the above diff and return your findings as a JSON array."""
         return findings
 
     except Exception as e:
-        logger.error(
-            "Claude API call failed",
-            extra={"file": file.filename, "pass": pass_name, "error": str(e)},
-        )
+        import traceback
+        print(f"[CLAUDE ERROR] file={file.filename} pass={pass_name} error={e}\n{traceback.format_exc()}", flush=True)
         return []
 
 

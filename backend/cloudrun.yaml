@@ -12,11 +12,11 @@ spec:
         autoscaling.knative.dev/maxScale: "10"
         run.googleapis.com/cpu-throttling: "false"
     spec:
-      serviceAccountName: devsheriff-runner@devsheriff-prod.iam.gserviceaccount.com
+      serviceAccountName: devsheriff-runner@alhichdevsheriff.iam.gserviceaccount.com
       containerConcurrency: 80
       timeoutSeconds: 120
       containers:
-        - image: us-central1-docker.pkg.dev/devsheriff-prod/devsheriff-images/backend:latest
+        - image: us-central1-docker.pkg.dev/alhichdevsheriff/devsheriff-images/backend:latest
           ports:
             - containerPort: 8080
           resources:
@@ -27,6 +27,6 @@ spec:
             - name: ENVIRONMENT
               value: production
             - name: FIRESTORE_PROJECT_ID
-              value: devsheriff-prod
+              value: alhichdevsheriff
             - name: GCP_PROJECT_ID
-              value: devsheriff-prod
+              value: alhichdevsheriff
